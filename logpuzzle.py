@@ -12,7 +12,9 @@ http://code.google.com/edu/languages/google-python-class/
 Given an apache logfile, find the puzzle urls and download the images.
 
 Here's what a puzzle url looks like:
-10.254.254.28 - - [06/Aug/2007:00:13:48 -0700] "GET /~foo/puzzle-bar-aaab.jpg HTTP/1.0" 302 528 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
+10.254.254.28 - - [06/Aug/2007:00:13:48 -0700] "GET /~foo/puzzle-bar-aaab.jpg
+HTTP/1.0" 302 528 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6)
+Gecko/20070725 Firefox/2.0.0.6"
 
 """
 
@@ -28,8 +30,26 @@ def read_urls(filename):
     extracting the hostname from the filename itself.
     Screens out duplicate urls and returns the urls sorted into
     increasing order."""
-    # +++your code here+++
-    pass
+    # Method - 1
+    # hostname = filename.rsplit('_', 1)
+    # with open(filename, 'rt') as in_file:  # Open file for reading of text data.
+    #     contents = in_file.read()  # Read the entire file into a variable named contents.
+    #     result = re.findall(r'GET (\S*) HTTP', contents)
+    #     result = [url for url in result if "puzzle" in url]
+    #     new_list = []
+    #     [new_list.append('http://'+hostname[-1]+url) for url in result]
+    # return sorted(set(new_list))
+
+    hostname = filename.rsplit('_', 1)
+    with open(filename, 'rt') as in_file:  # Open file for reading of text data.
+        contents = in_file.read()  # Read the entire file into a variable named contents.
+        result = re.findall(r'GET (\S*) HTTP', contents)
+        result = [url.rpartition('-') for url in result if "puzzle" in url]
+        result = set(result)  # Removes the duplicate urls
+        result = sorted(result, key=lambda tup: (tup[-1]))  # Sort the urls
+        new_list = []
+        [new_list.append('http://'+hostname[-1]+(''.join(url))) for url in result]
+    return new_list
 
 
 def download_images(img_urls, dest_dir):
@@ -40,7 +60,16 @@ def download_images(img_urls, dest_dir):
     with an img tag to show each local image file.
     Creates the directory if necessary.
     """
-    # +++your code here+++
+    if not os.path.exists(dest_dir):
+        os.makedirs(dest_dir)  # Create dest_dir if not exist already
+    os.chdir(dest_dir)  # Change the current working dir to dest_dir
+    with open('index.html', 'w+') as f:
+        f.write('<html>\n<body>\n')
+        for i in range(len(img_urls)):
+            print "Retrieving..."+img_urls[i]
+            urllib.urlretrieve(img_urls[i], 'img'+str(i))
+            f.write('<img src="%s">' % ('img'+str(i)))
+        f.write('\n</body>\n</html>')
     pass
 
 
@@ -64,11 +93,11 @@ def main(args):
     parsed_args = parser.parse_args(args)
 
     img_urls = read_urls(parsed_args.logfile)
-
     if parsed_args.todir:
+        print "download"
         download_images(img_urls, parsed_args.todir)
     else:
-        print('\n'.join(img_urls))
+        print '\n'.join(img_urls)
 
 
 if __name__ == '__main__':
