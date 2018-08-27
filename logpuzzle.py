@@ -13,7 +13,8 @@ Given an apache logfile, find the puzzle urls and download the images.
 
 Here's what a puzzle url looks like:
 10.254.254.28 - - [06/Aug/2007:00:13:48 -0700] "GET /~foo/puzzle-bar-aaab.jpg
-HTTP/1.0" 302 528 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6)
+HTTP/1.0" 302 528 "-" "Mozilla/5.0 (Windows; U;
+Windows NT 5.1; en-US; rv:1.8.1.6)
 Gecko/20070725 Firefox/2.0.0.6"
 
 """
@@ -32,8 +33,8 @@ def read_urls(filename):
     increasing order."""
     # Method - 1
     # hostname = filename.rsplit('_', 1)
-    # with open(filename, 'rt') as in_file:  # Open file for reading of text data.
-    #     contents = in_file.read()  # Read the entire file into a variable named contents.
+    # with open(filename, 'rt') as in_file:  # Open file for reading the text
+    #     contents = in_file.read()
     #     result = re.findall(r'GET (\S*) HTTP', contents)
     #     result = [url for url in result if "puzzle" in url]
     #     new_list = []
@@ -41,14 +42,18 @@ def read_urls(filename):
     # return sorted(set(new_list))
 
     hostname = filename.rsplit('_', 1)
-    with open(filename, 'rt') as in_file:  # Open file for reading of text data.
-        contents = in_file.read()  # Read the entire file into a variable named contents.
+    # Open file for reading of text data.
+    with open(filename, 'rt') as in_file:
+        # Read the entire file into a variable named contents.
+        contents = in_file.read()
         result = re.findall(r'GET (\S*) HTTP', contents)
         result = [url.rpartition('-') for url in result if "puzzle" in url]
         result = set(result)  # Removes the duplicate urls
         result = sorted(result, key=lambda tup: (tup[-1]))  # Sort the urls
         new_list = []
-        [new_list.append('http://'+hostname[-1]+(''.join(url))) for url in result]
+        [new_list.append('http://'
+                         + hostname[-1]
+                         + (''.join(url))) for url in result]
     return new_list
 
 
@@ -76,7 +81,8 @@ def download_images(img_urls, dest_dir):
 def create_parser():
     """Create an argument parser object"""
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--todir',  help='destination directory for downloaded images')
+    parser.add_argument(
+        '-d', '--todir',  help='destination directory for downloaded images')
     parser.add_argument('logfile', help='apache logfile to extract urls from')
 
     return parser
